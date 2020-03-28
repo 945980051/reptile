@@ -1,0 +1,8 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: z945980051
+    url: jdbc:mysql://cdb-68u6udus.cd.tencentcdb.com:10023/jiankanglaifu?characterEncoding=UTF-8&useSSL=false&serverTimezone=Hongkong
