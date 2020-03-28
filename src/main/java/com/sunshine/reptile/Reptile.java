@@ -1,12 +1,13 @@
 package com.sunshine.reptile;
 
-import cn.wanghaomiao.seimi.core.Seimi;
 import com.sunshine.reptile.utils.HttpClient;
-import lombok.val;
+import com.sunshine.reptile.utils.HttpClient3;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.client.methods.HttpGet;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.net.URL;
 
 /**
  * @author : zhengwenyao
@@ -17,7 +18,11 @@ import java.net.URL;
 public class Reptile {
     @PostConstruct
     public void cj() {
-        Seimi s = new Seimi();
-        s.start("basic");
+        String url ="https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_gb2018_icd10az&code=";
+        char uc = 'A';
+        for (int i = 0; i < 26; i++) {
+            String s = HttpClient3.doGet(url+ (char) (uc + i));
+            System.out.println(s);
+        }
     }
 }
