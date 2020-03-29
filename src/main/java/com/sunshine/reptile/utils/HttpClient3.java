@@ -1,15 +1,5 @@
 package com.sunshine.reptile.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -17,6 +7,12 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+
+import java.io.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * @author : zhengwenyao
@@ -33,11 +29,11 @@ public class HttpClient3 {
         HttpClient httpClient = new HttpClient();
         // 设置http连接主机服务超时时间：15000毫秒
         // 先获取连接管理器对象，再获取参数对象,再进行参数的赋值
-        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(15000);
+        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(1500000);
         // 创建一个Get方法实例对象
         GetMethod getMethod = new GetMethod(url);
         // 设置get请求超时为60000毫秒
-        getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 60000);
+        getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 6000000);
         // 设置请求重试机制，默认重试次数：3次，参数设置为true，重试机制可用，false相反
         getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, true));
         getMethod.setRequestHeader("Cookie","_hitb_key=SFMyNTY.g3QAAAABbQAAAAR1c2VydAAAAANkAAVsb2dpbmQABHRydWVkAA91cGRhdGVfcGFzc3dvcmRkAAVmYWxzZWQACHVzZXJJbmZvdAAAACBkAAVhZG1pbmQABWZhbHNlZAACYnBhZGQAC2NsaXBhbG1faWNkbQAAAAM2LjBkAAtjbGlwYWxtX21kY2QAA25pbGQAD2NsaXBhbG1fdmVyc2lvbmQAA25pbGQADGNsaXBhbG1feWVhcm0AAAAEMjAxOWQACmRlcGFydG1lbnRkAANuaWxkAAVlbWFpbG0AAAAQOTQ1OTgwMDUxQHFxLmNvbWQABmdlbmRlcmQAA25pbGQACmhlYWRpbWd1cmxtAAAAAGQAAmlkYWNkAAppbWFnZV9uYW1lbQAAAABkAAtpbnNlcnRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAARaXN1cGRhdGVfcGFzc3dvcmRkAAR0cnVlZAADbWRjamQABm1vYmlsZWQABWZhbHNlZAALbW9iaWxlX2luZm9kAANuaWxkAAptb2JpbGVfbWRjZAADbmlsZAAEbmFtZWQAA25pbGQAA29yZ2QAA25pbGQACnJ1bGVfb3JkZXJkAAVmYWxzZWQACnN1YmplY3RfYnBhAGQAA3RlbGQAA25pbGQABXRpdGxlZAADbmlsZAAEdHlwZW0AAAAM5Liq5Lq655So5oi3ZAAKdXBkYXRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAAIdXNlcm5hbWVtAAAACTk0NTk4MDA1MWQAB3ZlcnNpb25sAAAAAW0AAAACQkpqZAADd2ViZAAFZmFsc2VkAAp3ZWJfd2VjaGF0bQAAAABkABN3ZWJfd2VjaGF0X25pY2tuYW1lbQAAAABkAAN3dDRtAAAAAkJK.6HcHScVmX4qgu3lgD0YiSzeIJBQqYRvMPG5lpx9L74Y");

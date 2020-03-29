@@ -6,3 +6,8 @@ spring:
     username: root
     password: z945980051
     url: jdbc:mysql://cdb-68u6udus.cd.tencentcdb.com:10023/jiankanglaifu?characterEncoding=UTF-8&useSSL=false&serverTimezone=Hongkong
+    type: com.alibaba.druid.pool.DruidDataSource
+  jpa:
+    hibernate:
+      ddl-auto: update
+   # show-sql: true
