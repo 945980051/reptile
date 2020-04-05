@@ -4,7 +4,7 @@ import com.sunshine.reptile.dao.Icd10Repository;
 import com.sunshine.reptile.domain.Icd10;
 import com.sunshine.reptile.domain.Icd10a;
 import com.sunshine.reptile.domain.Icd10b;
-import com.sunshine.reptile.utils.HttpClient3;
+import com.sunshine.reptile.utils.HttpClient4;
 import com.sunshine.reptile.utils.IdWorker;
 import com.sunshine.reptile.utils.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +34,15 @@ public class Reptile {
         char uc = 'A';
         List<Icd10a.DataBean> az = new ArrayList<>();
         for (int i = 0; i < 26; i++) {
-            String respBody = HttpClient3.doGet(url + table + "&code=" + (char) (uc + i));
+            String respBody = HttpClient4.doGet(url + table + "&code=" + (char) (uc + i));
             az.addAll(JsonUtils.toBean(respBody, Icd10a.class).getData());
         }
         for (Icd10a.DataBean dataBean : az) {
-            String respBody = HttpClient3.doGet(url + dataBean.getQuery_table() + "&code=" + dataBean.getCode());
+            String respBody = HttpClient4.doGet(url + dataBean.getQuery_table() + "&code=" + dataBean.getCode());
             for (Icd10 bean : JsonUtils.toBean(respBody, Icd10b.class).getData()) {
                 System.out.println(bean.getCode());
                 Icd10savaData(dataBean, bean);
-                respBody = HttpClient3.doGet(url + bean.getQuery_table() + "&code=" + bean.getCode());
+                respBody = HttpClient4.doGet(url + bean.getQuery_table() + "&code=" + bean.getCode());
                 Icd10b icd10c = JsonUtils.toBean(respBody, Icd10b.class);
                 if (icd10c.getData().size() > 0) {
                     Icd10 dataBeanc = icd10c.getData().get(0);

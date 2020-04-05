@@ -1,13 +1,4 @@
 package com.sunshine.reptile.utils;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -20,6 +11,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+import java.util.Map.Entry;
 /**
  * @author : zhengwenyao
  * @Description: TODO
@@ -38,12 +34,14 @@ public class HttpClient4 {
             // 设置请求头信息，鉴权
             httpGet.setHeader("Authorization", "Bearer da3efcbf-0845-4fe3-8aba-ee040be542c0");
             // 设置配置请求参数
-            RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(35000)// 连接主机服务超时时间
-                    .setConnectionRequestTimeout(35000)// 请求超时时间
-                    .setSocketTimeout(60000)// 数据读取超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(6000)// 连接主机服务超时时间
+                    .setConnectionRequestTimeout(350000)// 请求超时时间
+                    .setSocketTimeout(600000)// 数据读取超时时间
                     .build();
             // 为httpGet实例设置配置
             httpGet.setConfig(requestConfig);
+            httpGet.setHeader("Cookie","_hitb_key=SFMyNTY.g3QAAAABbQAAAAR1c2VydAAAAANkAAVsb2dpbmQABHRydWVkAA91cGRhdGVfcGFzc3dvcmRkAAVmYWxzZWQACHVzZXJJbmZvdAAAACBkAAVhZG1pbmQABWZhbHNlZAACYnBhZGQAC2NsaXBhbG1faWNkbQAAAAM2LjBkAAtjbGlwYWxtX21kY2QAA25pbGQAD2NsaXBhbG1fdmVyc2lvbmQAA25pbGQADGNsaXBhbG1feWVhcm0AAAAEMjAxOWQACmRlcGFydG1lbnRkAANuaWxkAAVlbWFpbG0AAAAQOTQ1OTgwMDUxQHFxLmNvbWQABmdlbmRlcmQAA25pbGQACmhlYWRpbWd1cmxtAAAAAGQAAmlkYWNkAAppbWFnZV9uYW1lbQAAAABkAAtpbnNlcnRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAARaXN1cGRhdGVfcGFzc3dvcmRkAAR0cnVlZAADbWRjamQABm1vYmlsZWQABWZhbHNlZAALbW9iaWxlX2luZm9kAANuaWxkAAptb2JpbGVfbWRjZAADbmlsZAAEbmFtZWQAA25pbGQAA29yZ2QAA25pbGQACnJ1bGVfb3JkZXJkAAVmYWxzZWQACnN1YmplY3RfYnBhAGQAA3RlbGQAA25pbGQABXRpdGxlZAADbmlsZAAEdHlwZW0AAAAM5Liq5Lq655So5oi3ZAAKdXBkYXRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAAIdXNlcm5hbWVtAAAACTk0NTk4MDA1MWQAB3ZlcnNpb25sAAAAAW0AAAACQkpqZAADd2ViZAAFZmFsc2VkAAp3ZWJfd2VjaGF0bQAAAABkABN3ZWJfd2VjaGF0X25pY2tuYW1lbQAAAABkAAN3dDRtAAAAAkJK.6HcHScVmX4qgu3lgD0YiSzeIJBQqYRvMPG5lpx9L74Y");
+
             // 执行get请求得到返回对象
             response = httpClient.execute(httpGet);
             // 通过返回对象获取返回数据
