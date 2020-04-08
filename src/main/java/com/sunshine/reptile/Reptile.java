@@ -61,29 +61,47 @@ public class Reptile {
     }
 
 
-    private static String version = "BJ开发版(2019)";
+    private static String version = "CN-B-DRG(2018)";
 
     /**
      * 分组测试
+     *
      * @param map
      * @param diags_code
      * @param opers_code
      */
-     @PostConstruct
+    @PostConstruct
     public static void fzcs(Map<String, Object> map, List<String> diags_code, List<String> opers_code) {
 
 
-
         //天才第一步 先拿现成结果
+        //标准版
+        map.put("comp_type", "normal");
         Result result = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
+        map.put("comp_type", "smart");
+        Result result2 = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
         System.out.println("东华分组结果:" + result.drg);
         //获取主要诊断相关基本信息
-        MainIcd10.RuleBean mainIcd10 = getMainIcd10(map.get("DISEASE_CODE").toString()).getRule().get(0);
+        List<MainIcd10.RuleBean> mainIcd10List = getMainIcd10(map.get("DISEASE_CODE").toString()).getRule();
+        if (mainIcd10List.size() == 0) {
+            throw new RuntimeException("主要诊断相关数据获取失败,分组异常");
+        }
+        MainIcd10.RuleBean mainIcd10 = mainIcd10List.get(0);
         //主要诊断Adrg计算模型是否符合 用于确定MDC
         List<String> mainAdrgA = mainIcd10.getAdrg_a();
         List<String> mdcs = mainIcd10.getMdcs();
+        //获取CC和Mcc
+        List<String> cc = new ArrayList<>();
+        List<String> mcc = new ArrayList<>();
+        getCcOrMcc(diags_code, cc, mcc);
+        //获取手术相关数据
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("type", "icd9");
+        hashMap.put("code", rulePackString(opers_code));
+        hashMap.put("version", version);
+        List<Opers.RuleBean> Icd9 = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Opers.class).getRule();
         //过滤主要诊断里的 adrg 用于确认mdc列表
-        filterADrg(map, mainIcd10, mainAdrgA, mdcs);
+        filterADrg(map, mainIcd10, mainAdrgA, mdcs, cc, Icd9);
         //确定了mdc列表为 mainAdrgA 每个成员的首字母
         List<String> mdc = new ArrayList<>();
         for (String str : mainAdrgA) {
@@ -93,18 +111,12 @@ public class Reptile {
         Set<String> aDrgSet = new HashSet<>();
         aDrgSet.addAll(mainAdrgA);
 
-        List<String> cc = new ArrayList<>();
-        List<String> mcc = new ArrayList<>();
 
-        HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("type", "icd10");
         hashMap.put("code", rulePackString(diags_code));
-        hashMap.put("version", version);
+
+        List<Diags.RuleBean> rule = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Diags.class).getRule();
         for (Diags.RuleBean ruleBean : JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Diags.class).getRule()) {
-            if (ruleBean.is_cc)
-                cc.add(ruleBean.getName());
-            if (ruleBean.is_mcc)
-                mcc.add(ruleBean.getName());
             for (String adrg : ruleBean.getAdrg_a()) {
                 for (String str : mdc) {
                     if (str.equals(adrg.substring(0, 1).toUpperCase()))
@@ -112,9 +124,8 @@ public class Reptile {
                 }
             }
         }
-        hashMap.put("type", "icd9");
-        hashMap.put("code", rulePackString(opers_code));
-        for (Opers.RuleBean ruleBean : JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Opers.class).getRule()) {
+
+        for (Opers.RuleBean ruleBean : Icd9) {
             for (String adrg : ruleBean.getAdrg_a()) {
                 for (String str : mdc) {
                     if (str.equals(adrg.substring(0, 1).toUpperCase()))
@@ -124,11 +135,11 @@ public class Reptile {
         }
         List<String> aDrgs = aDrgSet.stream().collect(Collectors.toList());
         //再次过滤所有不符合的ADRG
-        filterADrg(map, mainIcd10, aDrgs, mdcs);
+        filterADrg(map, mainIcd10, aDrgs, mdcs, cc, Icd9);
         List<String> drgList = new ArrayList<>();
 
         for (String aDrg : aDrgs) {
-            Drgs drgs = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_bj2019_adrg&code=" + aDrg), Drgs.class);
+            Drgs drgs = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_gb2018_adrg&code=" + aDrg), Drgs.class);
             drgList.addAll(drgs.getData().stream().map(Drgs.DataBean::getCode).collect(Collectors.toList()));
         }
         hashMap.put("type", "drg");
@@ -143,76 +154,208 @@ public class Reptile {
                     drgs.getRule().remove(i);
                 }
             }
+            if (ruleBean.is_cc() && cc.size() == 0) {
+                drgs.getRule().remove(i);
+            }
+            if (ruleBean.is_mcc() && mcc.size() == 0) {
+                drgs.getRule().remove(i);
+            }
         }
         List<String> list = new ArrayList<>(drgs.getRule().stream().map(Drgs.RuleBean::getCode).collect(Collectors.toList()));
         //获取排序列表
-        OrderBean orderBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/drg_order?table=rule_bj2019_order"), OrderBean.class);
+        OrderBean orderBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/drg_order?table=rule_gb2018_order"), OrderBean.class);
         //老实讲 这一长串我现在自己也看不懂了  作用是筛选出符合的几个分组 然后利用treeMap排序
         Map<Integer, String> resultMap = orderBean.getData().stream().collect(Collectors.toMap(OrderBean.DataBean::getOrder_at, OrderBean.DataBean::getCode))
                 .entrySet().stream().filter(entry -> list.contains(entry.getValue())).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-        TreeMap<Integer, String> treeMap = new TreeMap<>(resultMap);
-        for (Map.Entry<Integer, String> entry : treeMap.entrySet()) {
-            if (entry != null) {
-                System.out.println("本人分组结果为:" + entry.getValue());
-                break;
-            }
-        }
-       // System.out.println("123");
+        //结果集排序
+        TreeMap<Integer, String> treeMap = new TreeMap<>(new MyComparator());
+        treeMap.putAll(resultMap);
+        System.out.println(treeMap);
+        treeMap.entrySet().stream().limit(1).forEach(entry -> System.out.println("本人分组结果为:" + entry.getValue()));
+        System.out.println(result.getLogs().get(19).getLog());
+        System.out.println("东华标准分组结果:" + result.drg);
+        System.out.println(result2.getLogs().get(19).getLog());
+        System.out.println("东华智能分组结果:" + result2.drg);
+        System.out.println("分组完成");
     }
 
-    private static void filterADrg(Map<String, Object> map, MainIcd10.RuleBean mainIcd10, List<String> mainAdrgA, List<String> mdcs) {
+    private static void getCcOrMcc(List<String> diags_code, List<String> cc, List<String> mcc) {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("type", "icd10");
+        hashMap.put("code", rulePackString(diags_code));
+        hashMap.put("version", version);
+        for (Diags.RuleBean ruleBean : JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Diags.class).getRule()) {
+            if (ruleBean.is_cc)
+                cc.add(ruleBean.getName());
+            if (ruleBean.is_mcc)
+                mcc.add(ruleBean.getName());
+
+        }
+    }
+
+    private static void filterADrg(Map<String, Object> map, MainIcd10.RuleBean mainIcd10, List<String> adrgAs, List<String> mdcs, List<String> cc, List<Opers.RuleBean> icd9) {
         List<String> removeMainAdrgA = new ArrayList<>();
-        for (String adrgA : mainAdrgA) {
+        for (String adrgA : adrgAs) {
             for (String mdc : mdcs) {
-                for (MdcResult.DataBean dataBean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2019_mdc&code=" + mdc), MdcResult.class).getData()) {
+                for (MdcResult.DataBean dataBean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + mdc), MdcResult.class).getData()) {
                     if (dataBean.getCode().equals(adrgA)) {
-                        for (String computationalModel : dataBean.getModel_info().split(",")) {
-                            if (computationalModel.indexOf("主要诊断") == -1 && computationalModel.indexOf("其他诊断") == -1 && computationalModel.indexOf("主要手术") == -1)
-                                System.err.println("警告!! 主要诊断ADRG:" + dataBean.getName() + "中计算模型有遗漏 遗漏要求:" + computationalModel);
+                        //是否主诊算入并发症 	true
+                        if ("true".equals(dataBean.getIs_main_cc()) && cc.size() > 0) {
+                            removeMainAdrgA.add(dataBean.getCode());
                         }
-                        for (MdcResult.DataBean.TabRuleBean tabRuleBean : dataBean.getTab_rule()) {
-                            if ("主要诊断".equals(tabRuleBean.getName())) {
-                                if (tabRuleBean.getCode().stream().filter(name -> name.indexOf("_" + mainIcd10.getName()) != -1).collect(Collectors.toList()).size() == 0)
-                                    removeMainAdrgA.add(dataBean.getCode());
-                            } else if ("其他诊断".equals(tabRuleBean.getName())) {
-                                boolean skip = false;
-                                for (String diags : (List<String>) map.get("diags_code")) {
-                                    for (String rule : tabRuleBean.getCode()) {
-                                        if (rule.indexOf("_" + diags) != -1) {
-                                            skip = true;
-                                            break;
-                                        }
-                                    }
-                                    if (skip)
-                                        break;
-                                }
-                                if (!skip)
-                                    removeMainAdrgA.add(dataBean.getCode());
-                            } else if ("主要手术".equals(tabRuleBean.getName())) {
-                                boolean skip = false;
-                                for (String opers : (List<String>) map.get("opers_code")) {
-                                    for (String rule : tabRuleBean.getCode()) {
-                                        if (rule.indexOf("_" + opers) != -1) {
-                                            skip = true;
-                                            break;
-                                        }
-                                    }
-                                    if (skip)
-                                        break;
-                                }
-                                if (!skip)
-                                    removeMainAdrgA.add(dataBean.getCode());
-                            }
-                        }
+                        ruleFilter(dataBean, map, adrgAs, mainIcd10, removeMainAdrgA, icd9);
                     }
                 }
             }
         }
         for (String rName : removeMainAdrgA) {
-            mainAdrgA.remove(rName);
+            adrgAs.remove(rName);
         }
     }
 
+    private static void ruleFilter(MdcResult.DataBean dataBean, Map<String, Object> map, List<String> adrgAs, MainIcd10.RuleBean mainIcd10, List<String> removeMainAdrgA, List<Opers.RuleBean> icd9) {
+        //取当前adrg所有计算模型
+        String[] rules = dataBean.getModel_info().replace("要求", "").split(",");
+        for (String rule : rules) {
+            boolean skip = false;
+            switch (rule.trim()) {
+                case "主要诊断符合":
+                    if (getTableRuleCode("主要诊断", dataBean)
+                            .stream().filter(name -> name.indexOf("" + mainIcd10.getName()) != -1)
+                            .collect(Collectors.toList())
+                            .size() == 0)
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "其他诊断符合":
+                    if (!getIntersection(getTableRuleCode("其他诊断", dataBean), (List<String>) map.get("opers_code")))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "主要手术符合":
+                    //如果两个集合没有交集就说明条件不符合 予以删除
+                    if (!getIntersection(getTableRuleCode("主要手术", dataBean), (List<String>) map.get("diags_code")))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "其他手术符合":
+                    if (!getIntersection(getTableRuleCode("其他手术", dataBean), (List<String>) map.get("diags_code")))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "手术室手术符合":
+                    if (icd9.stream().filter(i -> i.getP_type() == 0).collect(Collectors.toList()).size() == 0)
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "住院日满足":
+                    Integer day = new Integer(map.get("ACCTUAL_DAYS").toString());
+                    List<String> days = dataBean.getIn_days();
+                    if (!(new Integer(days.get(0)) <= day && day <= new Integer(days.get(1))))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "出院转归满足":
+                case "出院转归符合":
+                    if (dataBean.getOut_result().stream().filter(data -> data.equals(map.get("SF0108").toString())).collect(Collectors.toList()).size() == 0)
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+               /* case "并且病历诊断符合ADRG诊断":
+
+                    break;*/
+                case "主要诊断或其他诊断符合其一":
+                    skip = false;
+                    if (getTableRuleCode("主要诊断", dataBean)
+                            .stream().filter(name -> name.indexOf("" + mainIcd10.getName()) != -1)
+                            .collect(Collectors.toList())
+                            .size() != 0)
+                        break;
+                    if (!getIntersection(getTableRuleCode("其他诊断", dataBean), (List<String>) map.get("opers_code")))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+             /*   case "病例诊断符合ADRG诊断":
+
+                    break;*/
+                case "要求新生儿天数符合":
+                case "新生儿天数符合":
+                    Integer newDay = new Integer(map.get("SF0100").toString());
+                    List<String> newDays = dataBean.getP_days();
+                    if (!(new Integer(newDays.get(0)) <= newDay && newDay <= new Integer(newDays.get(1))))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "病历诊断不在排除病历诊断列表内":
+                    if (getIntersection(getTableRuleCode("病案排除诊断", dataBean), (List<String>) map.get("diags_code")))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "新生儿体重符合":
+                    Integer weight = new Integer(map.get("SF0102").toString());
+                    List<String> weights = dataBean.getP_weight();
+                    if (!(new Integer(weights.get(0)) <= weight && weight <= new Integer(weights.get(1))))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "住院日和出院转归满足":
+                    skip = false;
+                    Integer dayT = new Integer(map.get("ACCTUAL_DAYS").toString());
+                    List<String> daysT = dataBean.getIn_days();
+                    if (!(new Integer(daysT.get(0)) <= dayT && dayT <= new Integer(daysT.get(1))))
+                        skip = true;
+                    if (dataBean.getOut_result().stream().filter(data -> data.equals(map.get("SF0108").toString())).collect(Collectors.toList()).size() == 0)
+                        skip = true;
+                    if (skip)
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "主要诊断不在排除主要诊断列表内":
+                    if (getTableRuleCode("排除主要诊断", dataBean).contains(mainIcd10.getName()))
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                case "住院日或出院转归满足其一":
+                    Integer dayY = new Integer(map.get("ACCTUAL_DAYS").toString());
+                    List<String> daysY = dataBean.getIn_days();
+                    if (new Integer(daysY.get(0)) <= dayY && dayY <= new Integer(daysY.get(1)))
+                        break;
+                    if (dataBean.getOut_result().stream().filter(data -> data.equals(map.get("SF0108").toString())).collect(Collectors.toList()).size() == 0)
+                        removeMainAdrgA.add(dataBean.getCode());
+                    break;
+                default:
+                    System.err.println("警告!! 主要诊断ADRG:" + dataBean.getName() + "中计算模型有遗漏 遗漏要求:" + rule.trim());
+                    break;
+            }
+
+        }
+
+    }
+
+    private static List<String> getTableRuleCode(String type, MdcResult.DataBean dataBean) {
+        return dataBean.getTab_rule()
+                .stream().filter(tabRuleBean -> type.equals(tabRuleBean.getName()))
+                .collect(Collectors.toList())
+                .get(0).getCode();
+    }
+
+    /**
+     * 取两个集合的交集 有交集返回true
+     *
+     * @param diags
+     * @param diagsCodes
+     * @return
+     */
+    private static boolean getIntersection(List<String> diags, List<String> diagsCodes) {
+        if (diags.size()==0)
+            return true;
+        boolean skip = false;
+        for (String diag : diags) {
+            for (String diagsCode : diagsCodes) {
+                if (diag.indexOf("_" + diagsCode) != -1) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (skip)
+                break;
+        }
+        return skip;
+    }
+
+    /**
+     * 封装请求字符串
+     *
+     * @param code
+     * @return
+     */
     private static String rulePackString(List<String> code) {
         String diagsCodeStr = "「";
         for (String str : code) {
@@ -234,24 +377,71 @@ public class Reptile {
 
     public static void main(String[] args) {
         Map<String, Object> map = new HashMap<>();
-        //  map.put("B_WT4_V1_ID","62707572");
-        map.put("DISEASE_CODE", "恶性肿瘤支持治疗");
-        map.put("AGE", "6");
-        map.put("GENDER", "9");
-        map.put("SF0100", "1");
-        map.put("SF0108", "1");
-        map.put("ACCTUAL_DAYS", "1");
-        map.put("TOTAL_EXPENSE", "2358.55");
-        map.put("version", version);
-        map.put("comp_type", "normal");
         //其他诊断编码
         List<String> diags_code = new ArrayList<>();
-        diags_code.add("纵隔恶性肿瘤");
-        map.put("diags_code", diags_code);
         //手术编码
         List<String> opers_code = new ArrayList<>();
-        opers_code.add("静脉注射化疗药物");
+        ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=861382"), ResourcesBean.class);
+        ResourcesBean.DataBean dataBean = resourcesBean.getData().get(0);
+        map.put("DISEASE_CODE", dataBean.getDisease_code());
+        map.put("AGE", dataBean.getAge());
+        map.put("GENDER", dataBean.getGender());
+        map.put("SF0100", dataBean.getSf0100());
+        map.put("SF0101", dataBean.getSf0101());
+        map.put("SF0102", dataBean.getSf0102());
+        map.put("SF0108", dataBean.getSf0108());
+        map.put("ACCTUAL_DAYS", dataBean.getAcctual_days());
+        map.put("TOTAL_EXPENSE", dataBean.getTotal_expense());
+        map.put("version", version);
+        diags_code = dataBean.getDiags_code();
+        opers_code = dataBean.getOpers_code();
+        if (diags_code.size() > 0) {
+            for (int i = 0; i < diags_code.size(); i++) {
+                map.put("diags_code[" + i + "]", diags_code.get(i));
+            }
+        }
+        map.put("diags_code", diags_code);
+        if (opers_code.size() > 0) {
+            for (int i = 0; i < opers_code.size(); i++) {
+                map.put("opers_code[" + i + "]", opers_code.get(i));
+            }
+        }
         map.put("opers_code", opers_code);
-        fzcs(map,diags_code,opers_code);
+        fzcs(map, diags_code, opers_code);
+
+/*
+
+        HashSet<String> set = new HashSet<>();
+        char uc = 'A';
+        for (int i = 0; i < 26; i++) {
+            for (MdcResult.DataBean bean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + (char) (uc + i)), MdcResult.class).getData()) {
+                //  for (MdcResult.DataBean bean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + (char) (uc + i)), MdcResult.class).getData()) {
+                set.add(bean.getModel_info());
+                if (bean.getModel_info().indexOf("病历诊断不在排除病历诊断列表内") != -1) {
+                    System.out.println("123");
+                }
+            }
+        }
+        HashSet<String> hashSet = new HashSet<>();
+        for (String s : set) {
+            s = s.replace("要求", "");
+            for (String s1 : s.split(",")) {
+                hashSet.add(s1.trim());
+            }
+        }
+        for (String s : hashSet) {
+            System.out.println(s);
+        }
+        System.out.println(hashSet);
+
+*/
+
+    }
+
+    //定义key的比较器，比较算法根据第一个参数o1,小于、等于或者大于o2分别返回负整数、0或者正整数，来决定二者存放的先后位置：返回负数则o1在前，正数则o2在前。
+    private static class MyComparator implements Comparator<Integer> {
+        public int compare(Integer o1, Integer o2) {
+            return o1.compareTo(o2);
+        }
     }
 }
