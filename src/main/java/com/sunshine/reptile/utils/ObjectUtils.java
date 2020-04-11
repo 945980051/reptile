@@ -1,28 +1,20 @@
 package com.sunshine.reptile.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
- * @author 张梓枫
- * @Description 对象工具类
- * @date:   2019年1月2日 上午10:08:44
+ * @author : zhengwenyao
+ * @Description: 自定义工具类
+ * @date Date : 2019年11月14日 17:53
  */
 public abstract class ObjectUtils {
 
-    /**
-     * @author 张梓枫
-     * @Description: 判断对象是否为空
-     * @param @param obj
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean isEmpty(Object obj) {
         if (obj == null) {
             return true;
@@ -45,63 +37,27 @@ public abstract class ObjectUtils {
         return false;
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:判断对象是否不为空
-     * @param @param obj
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean isNotEmpty(Object obj) {
         return !isEmpty(obj);
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:判断数组是否为空
-     * @param @param array
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean isEmpty(Object[] array) {
         return (array == null || array.length == 0);
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:判断数组是否不为空
-     * @param @param array
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean isNotEmpty(Object[] array) {
         return !isEmpty(array);
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:判断对象是否是数组
-     * @param @param obj
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean isArray(Object obj) {
         return (obj != null && obj.getClass().isArray());
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:将与数组中相同的对象添加到数组中
-     * @param @param array 数组
-     * @param @param obj 与数组元素相同的对象
-     * @param @return
-     * @return A[]
-     * @throws Exception 
-     */
+
     public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
         Class<?> compType = Object.class;
         if (array != null) {
@@ -119,15 +75,7 @@ public abstract class ObjectUtils {
         return newArr;
     }
 
-    /**
-     * @author 张梓枫
-     * @Description: 判断两个对象是否相等
-     * @param @param a
-     * @param @param b
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean equals(Object a, Object b) {
         if (Objects.equals(a, b)) {
             return true;
@@ -135,15 +83,7 @@ public abstract class ObjectUtils {
         return false;
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:判断两个数组是否相等
-     * @param @param o1
-     * @param @param o2
-     * @param @return
-     * @return boolean
-     * @throws Exception 
-     */
+
     public static boolean arrayEquals(Object o1, Object o2) {
         if (o1 instanceof Object[] && o2 instanceof Object[]) {
             return Arrays.equals((Object[]) o1, (Object[]) o2);
@@ -175,14 +115,7 @@ public abstract class ObjectUtils {
         return false;
     }
 
-    /**
-     * @author 张梓枫
-     * @Description: 将对象转换为数组
-     * @param @param source
-     * @param @return
-     * @return Object[]
-     * @throws Exception 
-     */
+
     public static Object[] toObjectArray(Object source) {
         if (source instanceof Object[]) {
             return (Object[]) source;
@@ -205,14 +138,7 @@ public abstract class ObjectUtils {
         return newArray;
     }
 
-    /**
-     * @author 张梓枫
-     * @Description:将对象转换为集合
-     * @param @param source
-     * @param @return
-     * @return List<?>
-     * @throws Exception 
-     */
+
     public static List<?> arrayToList(Object source) {
         return Arrays.asList(ObjectUtils.toObjectArray(source));
     }
@@ -274,4 +200,126 @@ public abstract class ObjectUtils {
         return null;
     }
 
+    private static final String JAVAP = "java.";
+    private static final String JAVADATESTR = "java.util.Date";
+
+    /**
+     * 获取利用反射获取类里面的值和名称
+     *
+     * @param obj
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static Map<String, Object> objectToMap(Object obj) throws IllegalAccessException {
+        Map<String, Object> map = new HashMap<>();
+        Class<?> clazz = obj.getClass();
+        //System.out.println(clazz);
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object value = field.get(obj);
+            map.put(fieldName, value);
+        }
+        return map;
+    }
+
+    /**
+     * 利用递归调用将Object中的值全部进行获取
+     *
+     * @param timeFormatStr 格式化时间字符串默认<strong>2017-03-10 10:21</strong>
+     * @param obj           对象
+     * @param excludeFields 排除的属性
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static Map<String, String> objectToMapString(String timeFormatStr, Object obj, String... excludeFields) throws IllegalAccessException {
+        Map<String, String> map = new HashMap<>();
+
+        if (excludeFields.length!=0){
+            List<String> list = Arrays.asList(excludeFields);
+            objectTransfer(timeFormatStr, obj, map, list);
+        }else{
+            objectTransfer(timeFormatStr, obj, map,null);
+        }
+        return map;
+    }
+
+
+    /**
+     * 递归调用函数
+     *
+     * @param obj           对象
+     * @param map           map
+     * @param excludeFields 对应参数
+     * @return
+     * @throws IllegalAccessException
+     */
+    private static Map<String, String> objectTransfer(String timeFormatStr, Object obj, Map<String, String> map, List<String> excludeFields) throws IllegalAccessException {
+        boolean isExclude=false;
+        //默认字符串
+        String formatStr = "YYYY-MM-dd HH:mm:ss";
+        //设置格式化字符串
+        if (timeFormatStr != null && !timeFormatStr.isEmpty()) {
+            formatStr = timeFormatStr;
+        }
+        if (excludeFields!=null){
+            isExclude=true;
+        }
+        Class<?> clazz = obj.getClass();
+        //获取值
+        for (Field field : clazz.getDeclaredFields()) {
+            String fieldName = clazz.getSimpleName() + "." + field.getName();
+            //判断是不是需要跳过某个属性
+            if (isExclude&&excludeFields.contains(fieldName)){
+                continue;
+            }
+            //设置属性可以被访问
+            field.setAccessible(true);
+            Object value = field.get(obj);
+            Class<?> valueClass = value.getClass();
+            if (valueClass.isPrimitive()) {
+                map.put(fieldName, value.toString());
+
+            } else if (valueClass.getName().contains(JAVAP)) {//判断是不是基本类型
+                if (valueClass.getName().equals(JAVADATESTR)) {
+                    //格式化Date类型
+                    SimpleDateFormat sdf = new SimpleDateFormat(formatStr);
+                    Date date = (Date) value;
+                    String dataStr = sdf.format(date);
+                    map.put(fieldName, dataStr);
+                } else {
+                    map.put(fieldName, value.toString());
+                }
+            } else {
+                objectTransfer(timeFormatStr, value, map,excludeFields);
+            }
+        }
+        return map;
+    }
+    public static String getURLEncoderString(String str) {
+        str = str.replaceAll("\\+", "%2B");
+        String result = "";
+        if (null == str) {
+            return "";
+        }
+        try {
+            result = java.net.URLEncoder.encode(str, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static String URLDecoderString(String str) {
+        String result = "";
+        if (null == str) {
+            return "";
+        }
+        try {
+            result = java.net.URLDecoder.decode(str, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

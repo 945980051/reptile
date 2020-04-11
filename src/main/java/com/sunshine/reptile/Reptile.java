@@ -1,15 +1,10 @@
 package com.sunshine.reptile;
 
-import com.sunshine.reptile.dao.Icd10Repository;
 import com.sunshine.reptile.domain.*;
 import com.sunshine.reptile.utils.HttpClient4;
-import com.sunshine.reptile.utils.IdWorker;
 import com.sunshine.reptile.utils.JsonUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,48 +15,17 @@ import java.util.stream.Collectors;
  */
 @Component
 public class Reptile {
-    @Resource
-    public Icd10Repository icd10Repository;
-    @Autowired
-    private IdWorker idWorker;
-
-    /**
-     * 采集ICD-10
-     */
-    //@PostConstruct
-    public void cj() {
-        String url = "https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=";
-        String table = "rule_gb2018_icd10az";
-        char uc = 'A';
-        List<Icd10a.DataBean> az = new ArrayList<>();
-        for (int i = 0; i < 26; i++) {
-            String respBody = HttpClient4.doGet(url + table + "&code=" + (char) (uc + i));
-            az.addAll(JsonUtils.toBean(respBody, Icd10a.class).getData());
-        }
-        for (Icd10a.DataBean dataBean : az) {
-            String respBody = HttpClient4.doGet(url + dataBean.getQuery_table() + "&code=" + dataBean.getCode());
-            for (Icd10 bean : JsonUtils.toBean(respBody, Icd10b.class).getData()) {
-                System.out.println(bean.getCode());
-                Icd10savaData(dataBean, bean);
-                respBody = HttpClient4.doGet(url + bean.getQuery_table() + "&code=" + bean.getCode());
-                Icd10b icd10c = JsonUtils.toBean(respBody, Icd10b.class);
-                if (icd10c.getData().size() > 0) {
-                    Icd10 dataBeanc = icd10c.getData().get(0);
-                    Icd10savaData(dataBean, dataBeanc);
-                }
-            }
-        }
-    }
-
-    private void Icd10savaData(Icd10a.DataBean dataBean, Icd10 dataBeanc) {
-        dataBeanc.setTitleName(dataBean.getName());
-        dataBeanc.setTitleCode(dataBean.getCode());
-        dataBeanc.setId(String.valueOf(idWorker.nextId()));
-        icd10Repository.save(dataBeanc);
-    }
 
 
-    private static String version = "CN-B-DRG(2018)";
+
+    //private static String version = "CN-B-DRG(2018)";
+    private static String version = "整合开发版(2019)";
+    //  private static String version_order="rule_gb2018_order";
+    private static String version_order = "rule_bj2019_order";
+    //  private static String version_mdc ="rule_gb2018_mdc";
+    private static String version_mdc = "rule_bj2019_mdc";
+    //   private static String version_adrg ="rule_gb2018_adrg";
+    private static String version_adrg = "rule_bj2019_adrg";
 
     /**
      * 分组测试
@@ -70,17 +34,16 @@ public class Reptile {
      * @param diags_code
      * @param opers_code
      */
-    @PostConstruct
-    public static void fzcs(Map<String, Object> map, List<String> diags_code, List<String> opers_code) {
-
-
+    // @PostConstruct
+    public static String fzcs(Map<String, Object> map) {
+        List<String> diags_code = (List<String>) map.get("diags_code");
+        List<String> opers_code = (List<String>) map.get("opers_code");
         //天才第一步 先拿现成结果
         //标准版
         map.put("comp_type", "normal");
         Result result = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
         map.put("comp_type", "smart");
         Result result2 = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
-        System.out.println("东华分组结果:" + result.drg);
         //获取主要诊断相关基本信息
         List<MainIcd10.RuleBean> mainIcd10List = getMainIcd10(map.get("DISEASE_CODE").toString()).getRule();
         if (mainIcd10List.size() == 0) {
@@ -139,7 +102,7 @@ public class Reptile {
         List<String> drgList = new ArrayList<>();
 
         for (String aDrg : aDrgs) {
-            Drgs drgs = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_gb2018_adrg&code=" + aDrg), Drgs.class);
+            Drgs drgs = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=" + version_adrg + "&code=" + aDrg), Drgs.class);
             drgList.addAll(drgs.getData().stream().map(Drgs.DataBean::getCode).collect(Collectors.toList()));
         }
         hashMap.put("type", "drg");
@@ -163,7 +126,7 @@ public class Reptile {
         }
         List<String> list = new ArrayList<>(drgs.getRule().stream().map(Drgs.RuleBean::getCode).collect(Collectors.toList()));
         //获取排序列表
-        OrderBean orderBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/drg_order?table=rule_gb2018_order"), OrderBean.class);
+        OrderBean orderBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/drg_order?table=" + version_order), OrderBean.class);
         //老实讲 这一长串我现在自己也看不懂了  作用是筛选出符合的几个分组 然后利用treeMap排序
         Map<Integer, String> resultMap = orderBean.getData().stream().collect(Collectors.toMap(OrderBean.DataBean::getOrder_at, OrderBean.DataBean::getCode))
                 .entrySet().stream().filter(entry -> list.contains(entry.getValue())).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
@@ -177,6 +140,7 @@ public class Reptile {
         System.out.println(result2.getLogs().get(19).getLog());
         System.out.println("东华智能分组结果:" + result2.drg);
         System.out.println("分组完成");
+        return treeMap.values().stream().limit(1).collect(Collectors.joining());
     }
 
     private static void getCcOrMcc(List<String> diags_code, List<String> cc, List<String> mcc) {
@@ -197,7 +161,7 @@ public class Reptile {
         List<String> removeMainAdrgA = new ArrayList<>();
         for (String adrgA : adrgAs) {
             for (String mdc : mdcs) {
-                for (MdcResult.DataBean dataBean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + mdc), MdcResult.class).getData()) {
+                for (MdcResult.DataBean dataBean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=" + version_mdc + "&code=" + mdc), MdcResult.class).getData()) {
                     if (dataBean.getCode().equals(adrgA)) {
                         //是否主诊算入并发症 	true
                         if ("true".equals(dataBean.getIs_main_cc()) && cc.size() > 0) {
@@ -334,7 +298,7 @@ public class Reptile {
      * @return
      */
     private static boolean getIntersection(List<String> diags, List<String> diagsCodes) {
-        if (diags.size()==0)
+        if (diags.size() == 0)
             return true;
         boolean skip = false;
         for (String diag : diags) {
@@ -358,8 +322,12 @@ public class Reptile {
      */
     private static String rulePackString(List<String> code) {
         String diagsCodeStr = "「";
-        for (String str : code) {
-            diagsCodeStr = diagsCodeStr + str + ",";
+        if (code != null) {
+            for (String str : code) {
+                diagsCodeStr = diagsCodeStr + str + ",";
+            }
+        } else {
+            diagsCodeStr = diagsCodeStr + ",";
         }
         diagsCodeStr = diagsCodeStr.substring(0, diagsCodeStr.length() - 1) + "」";
         return diagsCodeStr;
@@ -377,11 +345,7 @@ public class Reptile {
 
     public static void main(String[] args) {
         Map<String, Object> map = new HashMap<>();
-        //其他诊断编码
-        List<String> diags_code = new ArrayList<>();
-        //手术编码
-        List<String> opers_code = new ArrayList<>();
-        ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=861382"), ResourcesBean.class);
+        ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=759778"), ResourcesBean.class);
         ResourcesBean.DataBean dataBean = resourcesBean.getData().get(0);
         map.put("DISEASE_CODE", dataBean.getDisease_code());
         map.put("AGE", dataBean.getAge());
@@ -393,8 +357,10 @@ public class Reptile {
         map.put("ACCTUAL_DAYS", dataBean.getAcctual_days());
         map.put("TOTAL_EXPENSE", dataBean.getTotal_expense());
         map.put("version", version);
-        diags_code = dataBean.getDiags_code();
-        opers_code = dataBean.getOpers_code();
+        //其他诊断编码
+        List<String> diags_code = dataBean.getDiags_code();
+        //手术编码
+        List<String> opers_code = dataBean.getOpers_code();
         if (diags_code.size() > 0) {
             for (int i = 0; i < diags_code.size(); i++) {
                 map.put("diags_code[" + i + "]", diags_code.get(i));
@@ -407,7 +373,7 @@ public class Reptile {
             }
         }
         map.put("opers_code", opers_code);
-        fzcs(map, diags_code, opers_code);
+        String fzcs = fzcs(map);
 
 /*
 

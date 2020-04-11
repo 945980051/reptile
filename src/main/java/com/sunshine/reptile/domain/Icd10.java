@@ -1,3 +1,4 @@
+/*
 package com.sunshine.reptile.domain;
 
 import lombok.Data;
@@ -5,11 +6,13 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.List;
 
+*/
 /**
  * @author : zhengwenyao
  * @Description: TODO
  * @date Date : 2020年03月29日 7:15
- */
+ *//*
+
 @Entity
 @Data
 @Table(name = "icd10")
@@ -65,3 +68,4 @@ public class Icd10 {
     public List<String> no_cc;
 
 }
+*/
