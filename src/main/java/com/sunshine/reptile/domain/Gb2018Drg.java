@@ -26,7 +26,7 @@ public class Gb2018Drg implements Serializable {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Gb2018DrgModels drg_models;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String inserted_at;
     private Boolean is_cc;

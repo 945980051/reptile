@@ -2,10 +2,7 @@ package com.sunshine.reptile.domain;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author : zhengwenyao
@@ -20,7 +17,7 @@ public class Gb2018Icd10Az {
     public String code;
     public String icdc_az;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String inserted_at;
     public String name;

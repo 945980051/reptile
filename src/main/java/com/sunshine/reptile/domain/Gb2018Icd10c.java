@@ -20,7 +20,7 @@ public  class Gb2018Icd10c {
     public String code;
     public String diag_main_mcc;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String inserted_at;
     public String is_cc;

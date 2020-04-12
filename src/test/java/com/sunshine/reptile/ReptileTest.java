@@ -1,14 +1,17 @@
 package com.sunshine.reptile;
 
+import com.sunshine.reptile.config.RedisClient;
 import com.sunshine.reptile.dao.*;
 import com.sunshine.reptile.domain.*;
 import com.sunshine.reptile.utils.HttpClient4;
 import com.sunshine.reptile.utils.JsonUtils;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author : zhengwenyao
@@ -26,6 +29,8 @@ public class ReptileTest extends BaseTest {
     private Icd10AzListRepository icd10AzListRepository;
     @Resource
     private Icd10cListRepository icd10cListRepository;
+    @Autowired
+    private RedisClient<String> redisClient;
 
     @Test
     public void reptileMdcList() {
@@ -50,7 +55,6 @@ public class ReptileTest extends BaseTest {
         for (Gb2018Adrg gb2018Adrg : list) {
             adrgListRepository.save(gb2018Adrg);
         }
-
     }
 
     @Test
@@ -73,6 +77,7 @@ public class ReptileTest extends BaseTest {
     @Test
     public void reptileIcd10AzList() {
         icd10AzListRepository.deleteAll();
+        icd10cListRepository.deleteAll();
         char uc = 'A';
         ArrayList<Gb2018Icd10Az> list = new ArrayList<>();
         for (int i = 0; i < 26; i++) {
@@ -87,24 +92,28 @@ public class ReptileTest extends BaseTest {
 
     @Test
     public void reptileIcd10cList() {
-        List<Gb2018Icd10c> list = new ArrayList<>();
         icd10cListRepository.deleteAll();
         for (Gb2018Icd10Az gb2018Icd10 : icd10AzListRepository.findAll()) {
+            System.out.println(gb2018Icd10.getCode());
             String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_gb2018_icd10c&code=" + gb2018Icd10.getCode());
             List<Gb2018Icd10c> gb2018Icd10cList = JsonUtils.toBean(s, Gb2018Icd10cList.class).getData();
-         //   list.addAll(gb2018Icd10cList);
-
-            icd10cListRepository.saveAll(gb2018Icd10cList);
-        }
-        System.out.println(list.size());
-        for (Gb2018Icd10c gb2018Icd10c : list) {
-            icd10cListRepository.save(gb2018Icd10c);
+            List<Gb2018Icd10c> list = gb2018Icd10cList
+                    .stream().filter(gb2018Icd10c -> gb2018Icd10c.getCode() != null)
+                    .collect(Collectors.toList());
+            for (Gb2018Icd10c gb2018Icd10c : list) {
+                if (!redisClient.exists(gb2018Icd10c.getCode())) {
+                    redisClient.set(gb2018Icd10c.getCode(), gb2018Icd10c.getName());
+                    icd10cListRepository.save(gb2018Icd10c);
+                }
+            }
         }
     }
 
     @Test
     public void reptileIcd10Info() {
-        //icd10ListRepository.deleteAll();
-
+        icd10cListRepository.deleteAll();
+        String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_gb2018_icd10c&code=A64");
+        List<Gb2018Icd10c> gb2018Icd10cList = JsonUtils.toBean(s, Gb2018Icd10cList.class).getData();
+        System.out.println(gb2018Icd10cList);
     }
 }

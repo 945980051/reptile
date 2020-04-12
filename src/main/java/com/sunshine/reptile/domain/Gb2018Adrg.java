@@ -26,7 +26,7 @@ public class Gb2018Adrg implements Serializable {
     public String model_info;
     public String name;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String code;
     public String inserted_at;

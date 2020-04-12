@@ -28,7 +28,7 @@ public class Gb2018Mdc implements Serializable {
     @ElementCollection
     private List<Integer> in_days;
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ElementCollection
     private List<Integer> out_result;
