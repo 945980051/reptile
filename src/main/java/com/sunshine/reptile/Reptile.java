@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class Reptile {
 
 
-
     //private static String version = "CN-B-DRG(2018)";
     private static String version = "整合开发版(2019)";
     //  private static String version_order="rule_gb2018_order";
@@ -42,6 +41,7 @@ public class Reptile {
         //标准版
         map.put("comp_type", "normal");
         Result result = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
+        //智能分组版
         map.put("comp_type", "smart");
         Result result2 = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/comp_drg", map), Result.class);
         //获取主要诊断相关基本信息
@@ -78,7 +78,6 @@ public class Reptile {
         hashMap.put("type", "icd10");
         hashMap.put("code", rulePackString(diags_code));
 
-        List<Diags.RuleBean> rule = JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Diags.class).getRule();
         for (Diags.RuleBean ruleBean : JsonUtils.toBean(HttpClient4.doPost("https://www.jiankanglaifu.com/servers/get_rule", hashMap), Diags.class).getRule()) {
             for (String adrg : ruleBean.getAdrg_a()) {
                 for (String str : mdc) {
@@ -347,8 +346,11 @@ public class Reptile {
         Map<String, Object> map = new HashMap<>();
         ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=759778"), ResourcesBean.class);
         ResourcesBean.DataBean dataBean = resourcesBean.getData().get(0);
+        //主要诊断编码
         map.put("DISEASE_CODE", dataBean.getDisease_code());
+        //年龄
         map.put("AGE", dataBean.getAge());
+        //性别
         map.put("GENDER", dataBean.getGender());
         map.put("SF0100", dataBean.getSf0100());
         map.put("SF0101", dataBean.getSf0101());
@@ -374,33 +376,6 @@ public class Reptile {
         }
         map.put("opers_code", opers_code);
         String fzcs = fzcs(map);
-
-/*
-
-        HashSet<String> set = new HashSet<>();
-        char uc = 'A';
-        for (int i = 0; i < 26; i++) {
-            for (MdcResult.DataBean bean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + (char) (uc + i)), MdcResult.class).getData()) {
-                //  for (MdcResult.DataBean bean : JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_gb2018_mdc&code=" + (char) (uc + i)), MdcResult.class).getData()) {
-                set.add(bean.getModel_info());
-                if (bean.getModel_info().indexOf("病历诊断不在排除病历诊断列表内") != -1) {
-                    System.out.println("123");
-                }
-            }
-        }
-        HashSet<String> hashSet = new HashSet<>();
-        for (String s : set) {
-            s = s.replace("要求", "");
-            for (String s1 : s.split(",")) {
-                hashSet.add(s1.trim());
-            }
-        }
-        for (String s : hashSet) {
-            System.out.println(s);
-        }
-        System.out.println(hashSet);
-
-*/
 
     }
 
