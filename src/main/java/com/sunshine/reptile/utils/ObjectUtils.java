@@ -32,7 +32,7 @@ public abstract class ObjectUtils {
             return ((Map<?, ?>) obj).isEmpty();
         }
         if (obj instanceof Set) {
-            return ((Set<?>)obj).isEmpty();
+            return ((Set<?>) obj).isEmpty();
         }
         return false;
     }
@@ -142,8 +142,8 @@ public abstract class ObjectUtils {
     public static List<?> arrayToList(Object source) {
         return Arrays.asList(ObjectUtils.toObjectArray(source));
     }
-    
-    public static Boolean arrayContains(Object t,Object r){
+
+    public static Boolean arrayContains(Object t, Object r) {
         List<?> list = arrayToList(t);
         if (list.contains(r)) {
             return true;
@@ -224,6 +224,24 @@ public abstract class ObjectUtils {
     }
 
     /**
+     * 获取利用反射获取类里面的值和名称(结果key转大写)
+     * @param obj
+     * @return
+     * @throws IllegalAccessException
+     */
+    public static Map<String, Object> objectToMapKeyUp(Object obj) throws IllegalAccessException {
+        Map<String, Object> map = new HashMap<>();
+        for (Map.Entry<String, Object> entry : objectToMap(obj).entrySet()) {
+            if (entry.getValue() instanceof String){
+                map.put(entry.getKey().toUpperCase(), entry.getValue());
+            }else {
+                map.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return map;
+    }
+
+    /**
      * 利用递归调用将Object中的值全部进行获取
      *
      * @param timeFormatStr 格式化时间字符串默认<strong>2017-03-10 10:21</strong>
@@ -235,11 +253,11 @@ public abstract class ObjectUtils {
     public static Map<String, String> objectToMapString(String timeFormatStr, Object obj, String... excludeFields) throws IllegalAccessException {
         Map<String, String> map = new HashMap<>();
 
-        if (excludeFields.length!=0){
+        if (excludeFields.length != 0) {
             List<String> list = Arrays.asList(excludeFields);
             objectTransfer(timeFormatStr, obj, map, list);
-        }else{
-            objectTransfer(timeFormatStr, obj, map,null);
+        } else {
+            objectTransfer(timeFormatStr, obj, map, null);
         }
         return map;
     }
@@ -255,22 +273,22 @@ public abstract class ObjectUtils {
      * @throws IllegalAccessException
      */
     private static Map<String, String> objectTransfer(String timeFormatStr, Object obj, Map<String, String> map, List<String> excludeFields) throws IllegalAccessException {
-        boolean isExclude=false;
+        boolean isExclude = false;
         //默认字符串
         String formatStr = "YYYY-MM-dd HH:mm:ss";
         //设置格式化字符串
         if (timeFormatStr != null && !timeFormatStr.isEmpty()) {
             formatStr = timeFormatStr;
         }
-        if (excludeFields!=null){
-            isExclude=true;
+        if (excludeFields != null) {
+            isExclude = true;
         }
         Class<?> clazz = obj.getClass();
         //获取值
         for (Field field : clazz.getDeclaredFields()) {
             String fieldName = clazz.getSimpleName() + "." + field.getName();
             //判断是不是需要跳过某个属性
-            if (isExclude&&excludeFields.contains(fieldName)){
+            if (isExclude && excludeFields.contains(fieldName)) {
                 continue;
             }
             //设置属性可以被访问
@@ -291,11 +309,12 @@ public abstract class ObjectUtils {
                     map.put(fieldName, value.toString());
                 }
             } else {
-                objectTransfer(timeFormatStr, value, map,excludeFields);
+                objectTransfer(timeFormatStr, value, map, excludeFields);
             }
         }
         return map;
     }
+
     public static String getURLEncoderString(String str) {
         str = str.replaceAll("\\+", "%2B");
         String result = "";

@@ -1,4 +1,5 @@
 package com.sunshine.reptile.utils;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -16,13 +17,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
+
 /**
  * @author : zhengwenyao
  * @Description: TODO
  * @date Date : 2020年03月28日 12:25
  */
 public class HttpClient4 {
-    private static String privateKey="SFMyNTY.g3QAAAABbQAAAAR1c2VydAAAAANkAAVsb2dpbmQABHRydWVkAA91cGRhdGVfcGFzc3dvcmRkAAVmYWxzZWQACHVzZXJJbmZvdAAAACBkAAVhZG1pbmQABWZhbHNlZAACYnBhZGQAC2NsaXBhbG1faWNkbQAAAAM2LjBkAAtjbGlwYWxtX21kY2QAA25pbGQAD2NsaXBhbG1fdmVyc2lvbmQAA25pbGQADGNsaXBhbG1feWVhcm0AAAAEMjAxOWQACmRlcGFydG1lbnRkAANuaWxkAAVlbWFpbG0AAAAQOTQ1OTgwMDUxQHFxLmNvbWQABmdlbmRlcmQAA25pbGQACmhlYWRpbWd1cmxtAAAAAGQAAmlkYWNkAAppbWFnZV9uYW1lbQAAAABkAAtpbnNlcnRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAARaXN1cGRhdGVfcGFzc3dvcmRkAAR0cnVlZAADbWRjamQABm1vYmlsZWQABWZhbHNlZAALbW9iaWxlX2luZm9kAANuaWxkAAptb2JpbGVfbWRjZAADbmlsZAAEbmFtZWQAA25pbGQAA29yZ2QAA25pbGQACnJ1bGVfb3JkZXJkAAVmYWxzZWQACnN1YmplY3RfYnBhAGQAA3RlbGQAA25pbGQABXRpdGxlZAADbmlsZAAEdHlwZW0AAAAM5Liq5Lq655So5oi3ZAAKdXBkYXRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAAIdXNlcm5hbWVtAAAACTk0NTk4MDA1MWQAB3ZlcnNpb25sAAAAAW0AAAACQkpqZAADd2ViZAAFZmFsc2VkAAp3ZWJfd2VjaGF0bQAAAABkABN3ZWJfd2VjaGF0X25pY2tuYW1lbQAAAABkAAN3dDRtAAAAAkJK.6HcHScVmX4qgu3lgD0YiSzeIJBQqYRvMPG5lpx9L74Y";
+    private static String privateKey = "SFMyNTY.g3QAAAABbQAAAAR1c2VydAAAAANkAAVsb2dpbmQABHRydWVkAA91cGRhdGVfcGFzc3dvcmRkAAVmYWxzZWQACHVzZXJJbmZvdAAAACBkAAVhZG1pbmQABWZhbHNlZAACYnBhZGQAC2NsaXBhbG1faWNkbQAAAAM2LjBkAAtjbGlwYWxtX21kY2QAA25pbGQAD2NsaXBhbG1fdmVyc2lvbmQAA25pbGQADGNsaXBhbG1feWVhcm0AAAAEMjAxOWQACmRlcGFydG1lbnRkAANuaWxkAAVlbWFpbG0AAAAQOTQ1OTgwMDUxQHFxLmNvbWQABmdlbmRlcmQAA25pbGQACmhlYWRpbWd1cmxtAAAAAGQAAmlkYWNkAAppbWFnZV9uYW1lbQAAAABkAAtpbnNlcnRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAARaXN1cGRhdGVfcGFzc3dvcmRkAAR0cnVlZAADbWRjamQABm1vYmlsZWQABWZhbHNlZAALbW9iaWxlX2luZm9kAANuaWxkAAptb2JpbGVfbWRjZAADbmlsZAAEbmFtZWQAA25pbGQAA29yZ2QAA25pbGQACnJ1bGVfb3JkZXJkAAVmYWxzZWQACnN1YmplY3RfYnBhAGQAA3RlbGQAA25pbGQABXRpdGxlZAADbmlsZAAEdHlwZW0AAAAM5Liq5Lq655So5oi3ZAAKdXBkYXRlZF9hdHQAAAANZAAKX19zdHJ1Y3RfX2QAD0VsaXhpci5EYXRlVGltZWQACGNhbGVuZGFyZAATRWxpeGlyLkNhbGVuZGFyLklTT2QAA2RheWEdZAAEaG91cmEGZAALbWljcm9zZWNvbmRoAmEAYQBkAAZtaW51dGVhF2QABW1vbnRoYQpkAAZzZWNvbmRhI2QACnN0ZF9vZmZzZXRhAGQACXRpbWVfem9uZW0AAAAHRXRjL1VUQ2QACnV0Y19vZmZzZXRhAGQABHllYXJiAAAH42QACXpvbmVfYWJicm0AAAADVVRDZAAIdXNlcm5hbWVtAAAACTk0NTk4MDA1MWQAB3ZlcnNpb25sAAAAAW0AAAACQkpqZAADd2ViZAAFZmFsc2VkAAp3ZWJfd2VjaGF0bQAAAABkABN3ZWJfd2VjaGF0X25pY2tuYW1lbQAAAABkAAN3dDRtAAAAAkJK.6HcHScVmX4qgu3lgD0YiSzeIJBQqYRvMPG5lpx9L74Y";
+
     public static String doGet(String url) {
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -41,7 +44,7 @@ public class HttpClient4 {
                     .build();
             // 为httpGet实例设置配置
             httpGet.setConfig(requestConfig);
-            httpGet.setHeader("Cookie",privateKey);
+            httpGet.setHeader("Cookie", privateKey);
 
             // 执行get请求得到返回对象
             response = httpClient.execute(httpGet);
@@ -89,8 +92,10 @@ public class HttpClient4 {
         // 为httpPost实例设置配置
         httpPost.setConfig(requestConfig);
         // 设置请求头
-        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("Cookie",privateKey);
+        //      httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        httpPost.addHeader("X-Requested-With", "XMLHttpRequest");
+       // httpPost.setHeader("Cookie", privateKey);
 
         // 封装post请求参数
         if (null != paramMap && paramMap.size() > 0) {

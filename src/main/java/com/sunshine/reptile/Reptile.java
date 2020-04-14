@@ -344,7 +344,7 @@ public class Reptile {
 
     public static void main(String[] args) {
         Map<String, Object> map = new HashMap<>();
-        ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=759778"), ResourcesBean.class);
+        ResourcesBean resourcesBean = JsonUtils.toBean(HttpClient4.doGet("https://www.jiankanglaifu.com/edit/wt4_2016_id?id=823586"), ResourcesBean.class);
         ResourcesBean.DataBean dataBean = resourcesBean.getData().get(0);
         //主要诊断编码
         map.put("DISEASE_CODE", dataBean.getDisease_code());
