@@ -92,10 +92,8 @@ public class HttpClient4 {
         // 为httpPost实例设置配置
         httpPost.setConfig(requestConfig);
         // 设置请求头
-        //      httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        httpPost.addHeader("X-Requested-With", "XMLHttpRequest");
-       // httpPost.setHeader("Cookie", privateKey);
+        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("Cookie", privateKey);
 
         // 封装post请求参数
         if (null != paramMap && paramMap.size() > 0) {
