@@ -1,6 +1,5 @@
 package com.sunshine.reptile;
 
-import com.sunshine.reptile.domain.DrugClassification;
 import com.sunshine.reptile.domain.MdcResult;
 import com.sunshine.reptile.entity.*;
 import com.sunshine.reptile.utils.HttpClient4;
@@ -19,11 +18,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,36 +31,7 @@ import java.util.Map;
  * @Description: CN-B-DRG(2018)分组模型
  * @date Date : 2020年04月14日 0:04
  */
-@Component
 public class DrgsGrouping {
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    /**
-     * 医保局药品分类采集
-     *
-     * @throws IOException
-     */
-    @PostConstruct
-    public void ypfl() throws IOException {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("batchNumber", "20200316");
-        hashMap.put("_search", "false");
-        hashMap.put("nd", "1586837169171");
-        hashMap.put("rows", "500");
-
-        hashMap.put("sidx", "t.goods_code");
-        hashMap.put("sord", "asc");
-        ArrayList<DrugClassification.RowsBean> list = new ArrayList<>();
-        for (int i = 1; i <= 173; i++) {
-            hashMap.put("page", String.valueOf(i));
-            String post = getPost("http://code.nhsa.gov.cn:8000/yp/getPublishGoodsDataInfo.html", hashMap);
-            list.addAll(JsonUtils.toBean(post, DrugClassification.class).getRows());
-        }
-        for (DrugClassification.RowsBean rowsBean : list) {
-            mongoTemplate.save(rowsBean);
-        }
-    }
 
     private static final String version = "CN-B-DRG(2018)";
     private static final String version_mdc = "rule_gb2018_mdc";
