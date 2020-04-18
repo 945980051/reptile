@@ -102,5 +102,8 @@ public class DrugClassification {
         public String productmedicinemodel;
         public String productname;
         public String productinsurancetype;
+        public String productremark;
+
+
     }
 }

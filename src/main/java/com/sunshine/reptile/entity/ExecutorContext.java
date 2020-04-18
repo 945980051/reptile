@@ -2,7 +2,10 @@ package com.sunshine.reptile.entity;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : zhengwenyao
@@ -16,6 +19,20 @@ public class ExecutorContext {
     private List<Icd9> icd9s;
     private List<String> mdc;
     private List<String> aDrg;
+    private List<Drg> drgs;
+    private List<Rule> rules;
     private List<String> cc;
     private List<String> mcc;
+    private Map<String,Object> initialData;
+    //被过滤掉的Adrg k:名称 v:原因
+    private Map<String, String> removeAdrg;
+    //被过滤掉的Drg k:名称 v:原因
+    private Map<String, String> removeDrg;
+
+    public ExecutorContext() {
+        this.drgs=new ArrayList<>();
+        this.rules=new ArrayList<>();
+        this.removeAdrg = new HashMap<>();
+        this.removeDrg = new HashMap<>();
+    }
 }
