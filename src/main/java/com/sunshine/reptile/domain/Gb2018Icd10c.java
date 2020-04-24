@@ -1,7 +1,6 @@
 package com.sunshine.reptile.domain;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,40 +10,43 @@ import java.util.List;
  * @Description: TODO
  * @date Date : 2020年04月12日 18:40
  */
-@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "rule_gb2018_icd10c_list")
-public  class Gb2018Icd10c {
+public class Gb2018Icd10c {
 
-    public String code;
-    public String diag_main_mcc;
+    private String code;
+    @ElementCollection
+    private List<String> codes;
+    private String diag_main_mcc;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Integer id;
-    public String inserted_at;
-    public String is_cc;
-    public String is_main;
-    public String is_mcc;
-    public String is_sub;
-    public String mdc_z;
-    public String name;
-    public String p_main;
-    public String p_other;
-    public String query_table;
-    public String sub_code;
-    public String updated_at;
-    public String version;
+    private Integer id;
+    private String inserted_at;
+    private String is_cc;
+    private String is_main;
+    private String is_mcc;
+    private String is_sub;
+    private String mdc_z;
+    private String name;
+    private String p_main;
+    private String p_other;
+    private String query_table;
+    private String sub_code;
+    private String updated_at;
+    private String version;
     @ElementCollection
-    public List<String> adrg_a;
+    private List<String> adrg_a;
     @ElementCollection
-    public List<String> adrg_ab;
+    private List<String> adrg_ab;
     @ElementCollection
-    public List<String> adrg_b;
+    private List<String> adrg_b;
     @ElementCollection
-    public List<String> logs;
+    private List<String> logs;
     @ElementCollection
-    public List<String> mdcs;
+    private List<String> mdcs;
     @ElementCollection
-    public List<String> no_cc;
+    private List<String> no_cc;
+    @Transient //jpa忽略该字段
+    private List<Gb2018Icd10F> subattribute;
 }

@@ -2,12 +2,9 @@ package com.sunshine.reptile.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author : zhengwenyao
@@ -19,16 +16,17 @@ import java.util.List;
 @Entity
 @Table(name = "rule_gb2018_adrg_list")
 public class Gb2018Adrg implements Serializable {
-    public String query_table;
+  /*  public String query_table;
     public String model;
     public String is_oper_type_adrg;
     public String oper_type;
-    public String model_info;
+    public String model_info;*/
     public String name;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer id;
     public String code;
+/*
     public String inserted_at;
     public String mdc;
     public String is_main_cc;
@@ -76,5 +74,6 @@ public class Gb2018Adrg implements Serializable {
     @ElementCollection
     public List<String> icd10_d;
 
+*/
 
 }

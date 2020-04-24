@@ -7,15 +7,14 @@ import javax.persistence.*;
 /**
  * @author : zhengwenyao
  * @Description: TODO
- * @date Date : 2020年04月12日 18:09
+ * @date Date : 2020年04月12日 18:40
  */
 
 @Data
 @Entity
-@Table(name = "rule_gb2018_icd10az_list")
-public class Gb2018Icd10Az {
+@Table(name = "rule_gb2018_icd9a_list")
+public class Gb2018Icd9A {
     private String code;
-    private String icdc_az;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -25,3 +24,4 @@ public class Gb2018Icd10Az {
     private String updated_at;
     private String version;
 }
+
