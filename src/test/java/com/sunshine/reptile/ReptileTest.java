@@ -52,7 +52,8 @@ public class ReptileTest extends BaseTest {
        // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_cc2018_mdc_list");
        // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_bj2017_mdc_list");
       //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_bj2016_mdc_list");
-        String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_bj2015_mdc_list");
+       // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_bj2015_mdc_list");
+        String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_mdc?plat=client&table=rule_cc2015_mdc_list");
         List<Gb2018Mdc> gb2018MdcList = JsonUtils.toBean(s, Gb2018MdcList.class).getData();
         mdcListRepository.deleteAll();
         for (Gb2018Mdc gb2018Mdc : gb2018MdcList) {
@@ -76,7 +77,8 @@ public class ReptileTest extends BaseTest {
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_cc2018_mdc&code=" + gb2018Mdc.getMdc());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2017_mdc&code=" + gb2018Mdc.getMdc());
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2016_mdc&code=" + gb2018Mdc.getMdc());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2015_mdc&code=" + gb2018Mdc.getMdc());
+         //   String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2015_mdc&code=" + gb2018Mdc.getMdc());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_cc2015_mdc&code=" + gb2018Mdc.getMdc());
             List<Gb2018Adrg> gb2018AdrgList = JsonUtils.toBean(s, Gb2018AdrgList.class).getData();
             list.addAll(gb2018AdrgList);
         }
@@ -100,7 +102,8 @@ public class ReptileTest extends BaseTest {
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_cc2018_adrg&code=" + gb2018Adrg.getCode());
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_bj2017_adrg&code=" + gb2018Adrg.getCode());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_bj2016_adrg&code=" + gb2018Adrg.getCode());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_bj2015_adrg&code=" + gb2018Adrg.getCode());
+           // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_bj2015_adrg&code=" + gb2018Adrg.getCode());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_drg?plat=client&table=rule_cc2015_adrg&code=" + gb2018Adrg.getCode());
             if ("\"Server internal error\"".equals(s))
                 continue;
             List<Gb2018Drg> gb2018DrgList = JsonUtils.toBean(s, Gb2018DrgList.class).getData();
@@ -238,7 +241,8 @@ public class ReptileTest extends BaseTest {
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2018_icd10az&code=" + (char) (uc + i));
          //   String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2017_icd10az&code=" + (char) (uc + i));
             //String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2016_icd10az&code=" + (char) (uc + i));
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2015_icd10az&code=" + (char) (uc + i));
+           // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2015_icd10az&code=" + (char) (uc + i));
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2015_icd10az&code=" + (char) (uc + i));
             List<Gb2018Icd10Az> gb2018Icd10List = JsonUtils.toBean(s, Gb2018Icd10AzList.class).getData();
             list.addAll(gb2018Icd10List);
         }
@@ -252,7 +256,7 @@ public class ReptileTest extends BaseTest {
             //String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2018_icd10c&code=" + gb2018Icd10Az.getCode());
          //   String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2017_icd10c&code=" + gb2018Icd10Az.getCode());
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2016_icd10c&code=" + gb2018Icd10Az.getCode());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2015_icd10c&code=" + gb2018Icd10Az.getCode());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2015_icd10c&code=" + gb2018Icd10Az.getCode());
             for (Gb2018Icd10c gb2018Icd10c : JsonUtils.toBean(s, Gb2018Icd10cList.class).getData()
                     .stream().filter(gb2018Icd10c -> gb2018Icd10c.getCode() != null && gb2018Icd10c.getCode().startsWith(gb2018Icd10Az.getCode()))
                     .collect(Collectors.toList())) {
@@ -271,7 +275,7 @@ public class ReptileTest extends BaseTest {
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2018_icd10cc&code=" + value.getCode());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2017_icd10cc&code=" + value.getCode());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2016_icd10cc&code=" + value.getCode());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2015_icd10cc&code=" + value.getCode());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2015_icd10cc&code=" + value.getCode());
             value.setSubattribute(JsonUtils.toBean(s, Gb2018Icd10FList.class).getData());
         }
         mongoTemplate.dropCollection(Gb2018Icd10F.class);
@@ -300,7 +304,8 @@ public class ReptileTest extends BaseTest {
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_cc2018_icd9_09&code=" + i);
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2017_icd9_09&code=" + i);
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2016_icd9_09&code=" + i);
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9_09&code=" + i);
+         //   String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9_09&code=" + i);
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_cc2015_icd9_09&code=" + i);
             List<Gb2018Icd9A> data = JsonUtils.toBean(s, Gb2018Icd9AList.class).getData();
             list.addAll(data);
         }
@@ -313,7 +318,8 @@ public class ReptileTest extends BaseTest {
             //String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_cc2018_icd9c&code=" + gb2018Icd9A.getCode());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2017_icd9c&code=" + gb2018Icd9A.getCode());
             //String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2016_icd9c&code=" + gb2018Icd9A.getCode());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9c&code=" + gb2018Icd9A.getCode());
+          //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9c&code=" + gb2018Icd9A.getCode());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_cc2015_icd9c&code=" + gb2018Icd9A.getCode());
             List<Gb2018Icd9B> data = JsonUtils.toBean(s, Gb2018Icd9BList.class).getData().stream().filter(gb2018Icd9B -> gb2018Icd9B.getCode() != null).collect(Collectors.toList());
             for (Gb2018Icd9B datum : data) {
                 map.put(datum.getName(), datum);
@@ -329,7 +335,8 @@ public class ReptileTest extends BaseTest {
             //String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_gb2019_icd9cc&code=" + value.getCode());
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2017_icd9cc&code=" + value.getCode());
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2016_icd9cc&code=" + value.getCode());
-            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9cc&code=" + value.getCode());
+           // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_bj2015_icd9cc&code=" + value.getCode());
+            String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd9?plat=client&table=rule_cc2015_icd9cc&code=" + value.getCode());
             for (Gb2018Icd9C datum : JsonUtils.toBean(s, Gb2018Icd9CList.class).getData()) {
                 mongoTemplate.save(datum);
             }
