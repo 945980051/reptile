@@ -77,6 +77,8 @@ public class ReptileTest extends BaseTest {
           //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2017_mdc&code=" + gb2018Mdc.getMdc());
            // String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2016_mdc&code=" + gb2018Mdc.getMdc());
             String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_adrg?plat=client&table=rule_bj2015_mdc&code=" + gb2018Mdc.getMdc());
+            if ("\"Server internal error\"".equals(s))
+                continue;
             List<Gb2018Adrg> gb2018AdrgList = JsonUtils.toBean(s, Gb2018AdrgList.class).getData();
             list.addAll(gb2018AdrgList);
         }
