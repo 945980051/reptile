@@ -12,26 +12,26 @@ import java.util.List;
 @Data
 public class Gb2018Icd10F {
    private String code;
-   private String diag_main_mcc;
+ //  private String diag_main_mcc;
    private String id;
-   private String inserted_at;
+  // private String inserted_at;
    private String is_cc;
    private String is_main;
    private String is_mcc;
-   private String is_sub;
+  // private String is_sub;
    private String mdc_z;
    private String name;
    private String p_main;
-   private String p_other;
-   private String query_table;
-   private String sub_code;
-   private String updated_at;
-   private String version;
+  // private String p_other;
+  // private String query_table;
+  // private String sub_code;
+  // private String updated_at;
+  // private String version;
    private List<String> adrg_a;
-   private List<String> adrg_ab;
-   private List<String> adrg_b;
+  // private List<String> adrg_ab;
+  // private List<String> adrg_b;
    private List<String> codes;
-   private List<String> logs;
+ //  private List<String> logs;
    private List<String> mdcs;
-   private List<String> no_cc;
+ //  private List<String> no_cc;
 }

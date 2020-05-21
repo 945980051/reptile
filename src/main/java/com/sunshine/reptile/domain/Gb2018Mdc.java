@@ -33,7 +33,7 @@ public class Gb2018Mdc implements Serializable {
     @ElementCollection
     private List<Integer> out_result;
     private String code;
-    private String no_DiseOper_adrg;
+    //private String no_DiseOper_adrg;
     private String inserted_at;
     private String oper_type_adrg;
     private String mdc;
