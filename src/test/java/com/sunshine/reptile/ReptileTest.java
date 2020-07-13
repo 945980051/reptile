@@ -12,10 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -279,10 +280,10 @@ public class ReptileTest extends BaseTest {
             //  String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_bj2016_icd10cc&code=" + value.getCode());
             String s = HttpClient4.doGet("https://www.jiankanglaifu.com/library/rule_icd10?plat=client&table=rule_cc2015_icd10cc&code=" + value.getCode());
             value.setSubattribute(JsonUtils.toBean(s, Gb2018Icd10FList.class).getData());
-            if (value.getSubattribute().size()==0){
-               List<Gb2018Icd10F> gb2018Icd10FS = new ArrayList<>();
+            if (value.getSubattribute().size() == 0) {
+                List<Gb2018Icd10F> gb2018Icd10FS = new ArrayList<>();
                 Gb2018Icd10F gb2018Icd10F = new Gb2018Icd10F();
-                BeanUtils.copy(value,gb2018Icd10F);
+                BeanUtils.copy(value, gb2018Icd10F);
                 gb2018Icd10FS.add(gb2018Icd10F);
                 value.setSubattribute(gb2018Icd10FS);
             }
@@ -349,7 +350,7 @@ public class ReptileTest extends BaseTest {
             List<Gb2018Icd9C> data = JsonUtils.toBean(s, Gb2018Icd9CList.class).getData();
             if (data.size() == 0) {
                 Gb2018Icd9C gb2018Icd9C = new Gb2018Icd9C();
-                BeanUtils.copy(value,gb2018Icd9C);
+                BeanUtils.copy(value, gb2018Icd9C);
                 mongoTemplate.save(gb2018Icd9C);
             } else {
                 for (Gb2018Icd9C datum : JsonUtils.toBean(s, Gb2018Icd9CList.class).getData()) {
@@ -468,6 +469,41 @@ public class ReptileTest extends BaseTest {
             return s5;
         } else {
             return s4;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        URL connURL = new URL("https://trade.500.com/jczq/");
+        HttpURLConnection httpConn = (HttpURLConnection) connURL.openConnection();
+        httpConn.setRequestProperty("Accept", "*/*");
+        httpConn.connect();
+        //httpConn.getHeaderField("keyName");
+        // 响应头部获取
+        Map<String, List<String>> headers = httpConn.getHeaderFields();
+        // 遍历所有的响应头字段
+        for (String key : headers.keySet()) {
+            System.out.println(key + ":  " + httpConn.getHeaderField(key));
+        }
+        // 定义BufferedReader输入流来读取URL的响应,并设置编码方式
+     BufferedReader in= null;
+
+        in = new BufferedReader(new InputStreamReader(httpConn
+                .getInputStream(), "gbk"));//通用编码格式为utf-8
+        String line;
+        StringBuffer buffer = new StringBuffer();
+        // 读取返回的内容
+        while ((line = in.readLine()) != null) {
+            buffer.append( line);
+        }
+        httpConn.disconnect();//主动断开httpConn连接
+        String regex="<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
+        Pattern compile = Pattern.compile(regex);
+        Matcher matcher = compile.matcher(buffer.toString());
+        if (matcher.matches()) {
+            String group1 = matcher.group(0);
+            String group2 =  matcher.group(1);
+            String group3 =  matcher.group(2);
+            System.out.println(group1);
         }
     }
 }
