@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -473,7 +474,32 @@ public class ReptileTest extends BaseTest {
     }
 
     public static void main(String[] args) throws Exception {
-        URL connURL = new URL("https://trade.500.com/jczq/");
+        String url = "https://trade.500.com/jczq/";
+        String respBody = doGet(url);
+        //<p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p>
+        String regex = "<span>(\\d*\\.\\d*)</span>";
+        regex = "<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
+        Matcher matcher = Pattern.compile(regex).matcher(respBody);
+        Map<String, List<String>> treeMap = new TreeMap<>();
+        while (matcher.find()) {
+            List<String> arrayList = new ArrayList<>();
+            arrayList.add(matcher.group(1));
+            arrayList.add(matcher.group(2));
+            arrayList.add(matcher.group(3));
+            TreeSet<String> treeSet = new TreeSet<>();
+            for (String str : arrayList) {
+                treeSet.add(str);
+            }
+            treeMap.put(treeSet.first(),arrayList);
+        }
+        //treeMap
+
+
+        System.out.println(treeMap);
+    }
+
+    private static String doGet(String url) throws IOException {
+        URL connURL = new URL(url);
         HttpURLConnection httpConn = (HttpURLConnection) connURL.openConnection();
         httpConn.setRequestProperty("Accept", "*/*");
         httpConn.connect();
@@ -482,10 +508,10 @@ public class ReptileTest extends BaseTest {
         Map<String, List<String>> headers = httpConn.getHeaderFields();
         // 遍历所有的响应头字段
         for (String key : headers.keySet()) {
-            System.out.println(key + ":  " + httpConn.getHeaderField(key));
+            //  System.out.println(key + ":  " + httpConn.getHeaderField(key));
         }
         // 定义BufferedReader输入流来读取URL的响应,并设置编码方式
-     BufferedReader in= null;
+        BufferedReader in = null;
 
         in = new BufferedReader(new InputStreamReader(httpConn
                 .getInputStream(), "gbk"));//通用编码格式为utf-8
@@ -493,18 +519,10 @@ public class ReptileTest extends BaseTest {
         StringBuffer buffer = new StringBuffer();
         // 读取返回的内容
         while ((line = in.readLine()) != null) {
-            buffer.append( line);
+            buffer.append(line);
         }
+        String respBody = buffer.toString();
         httpConn.disconnect();//主动断开httpConn连接
-        //<p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p>
-        String regex="<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
-        Pattern compile = Pattern.compile(regex);
-        Matcher matcher = compile.matcher(buffer.toString());
-        if (matcher.matches()) {
-            String group1 = matcher.group(0);
-            String group2 =  matcher.group(1);
-            String group3 =  matcher.group(2);
-            System.out.println(group1);
-        }
+        return respBody;
     }
 }
