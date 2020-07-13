@@ -496,6 +496,7 @@ public class ReptileTest extends BaseTest {
             buffer.append( line);
         }
         httpConn.disconnect();//主动断开httpConn连接
+        //<p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p>
         String regex="<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
         Pattern compile = Pattern.compile(regex);
         Matcher matcher = compile.matcher(buffer.toString());
