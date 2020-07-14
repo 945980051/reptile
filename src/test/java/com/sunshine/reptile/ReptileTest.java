@@ -505,7 +505,7 @@ public class ReptileTest extends BaseTest {
 
         for (String ra : ranksA) {
             for (String rb : ranksB) {
-                String money = getMoney(ra, rb, 1);
+                String money = getMoney(ra, rb, 3);
                 System.out.println(money);
             }
         }
