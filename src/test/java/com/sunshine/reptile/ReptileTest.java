@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -475,11 +476,12 @@ public class ReptileTest extends BaseTest {
 
     public static void main(String[] args) throws Exception {
         String url = "https://trade.500.com/jczq/";
-        String respBody = doGet(url);
+       // String respBody = doGet(url);
         //<p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p>
         String regex = "<span>(\\d*\\.\\d*)</span>";
         regex = "<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
-        Matcher matcher = Pattern.compile(regex).matcher(respBody);
+       // Matcher matcher = Pattern.compile(regex).matcher(respBody);
+        Matcher matcher = Pattern.compile(regex).matcher(doGet(url));
         Map<String, List<String>> treeMap = new TreeMap<>();
         while (matcher.find()) {
             List<String> arrayList = new ArrayList<>();
@@ -490,12 +492,34 @@ public class ReptileTest extends BaseTest {
             for (String str : arrayList) {
                 treeSet.add(str);
             }
-            treeMap.put(treeSet.first(),arrayList);
+            treeMap.put(treeSet.first(), arrayList);
         }
         //treeMap
+        String[] toArray = treeMap.keySet().toArray(new String[0]);
+        String s1 = toArray[toArray.length - 1];
+        String s2 = toArray[toArray.length - 2];
+        List<String> ranksA = treeMap.get(s1);
+        List<String> ranksB = treeMap.get(s2);
+
+
+
+        for (String ra : ranksA) {
+            for (String rb : ranksB) {
+                String money = getMoney(ra, rb, 1);
+                System.out.println(money);
+            }
+        }
 
 
         System.out.println(treeMap);
+    }
+
+    private static String getMoney(String ranksA, String ranksB, int multiple) {
+        return new BigDecimal(ranksA)
+                .multiply(new BigDecimal(ranksB))
+                .multiply(new BigDecimal(multiple+""))
+                .multiply(new BigDecimal("2"))
+                .toString();
     }
 
     private static String doGet(String url) throws IOException {
