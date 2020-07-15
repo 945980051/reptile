@@ -475,13 +475,8 @@ public class ReptileTest extends BaseTest {
     }
 
     public static void main(String[] args) throws Exception {
-        String url = "https://trade.500.com/jczq/";
-       // String respBody = doGet(url);
-        //<p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p><p class="betbtn" data-type="[a-z]*" data-value="\d" data-sp="\d*\.\d*"><span>(\d*\.\d*)</span></p>
-        String regex = "<span>(\\d*\\.\\d*)</span>";
-        regex = "<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
-       // Matcher matcher = Pattern.compile(regex).matcher(respBody);
-        Matcher matcher = Pattern.compile(regex).matcher(doGet(url));
+        String regex = "<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
+        Matcher matcher = Pattern.compile(regex).matcher(doGet("https://trade.500.com/jczq/"));
         Map<String, List<String>> treeMap = new TreeMap<>();
         while (matcher.find()) {
             List<String> arrayList = new ArrayList<>();
@@ -500,25 +495,49 @@ public class ReptileTest extends BaseTest {
         String s2 = toArray[toArray.length - 2];
         List<String> ranksA = treeMap.get(s1);
         List<String> ranksB = treeMap.get(s2);
-
-
-
+        boolean ary = true;
+        List<String> list = new ArrayList<>();
         for (String ra : ranksA) {
             for (String rb : ranksB) {
-                String money = getMoney(ra, rb, 3);
-                System.out.println(money);
+                list.add(set(ra, rb));
             }
+        }
+        int[] multiple = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+        for (int i = 0; i < list.size(); i++) {
+            String[] strings = get(list.get(i));
+            System.out.println(strings);
+            String money = getMoney(strings[0], strings[1], multiple[i]);
         }
 
 
         System.out.println(treeMap);
     }
 
+    private static String setCount(int[] multiple) {
+        BigDecimal bigDecimal = new BigDecimal("2");
+        for (int i = 0; i < multiple.length; i++) {
+            if (multiple[i]!=0){
+                bigDecimal=  bigDecimal.multiply(new BigDecimal(multiple[i]+""));
+            }
+        }
+        return bigDecimal.toString();
+    }
+
+
+    private static String set(String ranksA, String ranksB) {
+        return ranksA + "-" + ranksB;
+    }
+
+    private static String[] get(String ranks) {
+        return ranks.split("-");
+    }
+
     private static String getMoney(String ranksA, String ranksB, int multiple) {
         return new BigDecimal(ranksA)
                 .multiply(new BigDecimal(ranksB))
-                .multiply(new BigDecimal(multiple+""))
+                .multiply(new BigDecimal(multiple + ""))
                 .multiply(new BigDecimal("2"))
+                .multiply(new BigDecimal("1"))
                 .toString();
     }
 
