@@ -495,32 +495,56 @@ public class ReptileTest extends BaseTest {
         String s2 = toArray[toArray.length - 2];
         List<String> ranksA = treeMap.get(s1);
         List<String> ranksB = treeMap.get(s2);
-        boolean ary = true;
+
         List<String> list = new ArrayList<>();
         for (String ra : ranksA) {
             for (String rb : ranksB) {
                 list.add(set(ra, rb));
             }
         }
-        int[] multiple = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-        for (int i = 0; i < list.size(); i++) {
-            String[] strings = get(list.get(i));
-            System.out.println(strings);
-            String money = getMoney(strings[0], strings[1], multiple[i]);
-        }
 
+        list.remove(0);
+        list.remove(1);
+
+        int[] multiple = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+        boolean ary = true;
+        while (ary) {
+            for (int i = 0; i < list.size(); i++) {
+                String[] strings = get(list.get(i));
+                String money = getMoney(strings[0], strings[1], multiple[i]);
+                String count = getCount(multiple);
+                if (new BigDecimal(money).compareTo(new BigDecimal(count)) == -1) {
+                    multiple[i]++;
+                    continue;
+                }
+            }
+            System.out.println(getMultiple(multiple));
+        }
 
         System.out.println(treeMap);
     }
 
-    private static String setCount(int[] multiple) {
-        BigDecimal bigDecimal = new BigDecimal("2");
+    public static String getMultiple(int[] multiple) {
+        StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < multiple.length; i++) {
-            if (multiple[i]!=0){
-                bigDecimal=  bigDecimal.multiply(new BigDecimal(multiple[i]+""));
+            if (i != 0)
+                buffer.append(":");
+            buffer.append(multiple[i]);
+        }
+        return buffer.toString();
+    }
+
+    private static String getCount(int[] multiple) {
+        BigDecimal bigDecimal = new BigDecimal("0");
+        for (int i = 0; i < multiple.length; i++) {
+            if (multiple[i] != 0) {
+                bigDecimal = bigDecimal.add(new BigDecimal("2").multiply(new BigDecimal(multiple[i] + "")));
             }
         }
-        return bigDecimal.toString();
+        if (bigDecimal.compareTo(new BigDecimal("0")) == 0)
+            return "2";
+        else
+            return bigDecimal.toString();
     }
 
 
