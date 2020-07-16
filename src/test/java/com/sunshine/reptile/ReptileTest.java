@@ -7,6 +7,7 @@ import com.sunshine.reptile.utils.BeanUtils;
 import com.sunshine.reptile.utils.HttpClient;
 import com.sunshine.reptile.utils.HttpClient4;
 import com.sunshine.reptile.utils.JsonUtils;
+import lombok.Data;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -495,45 +496,122 @@ public class ReptileTest extends BaseTest {
         String s2 = toArray[toArray.length - 2];
         List<String> ranksA = treeMap.get(s1);
         List<String> ranksB = treeMap.get(s2);
+        Set<String> treeSet = new TreeSet<>();
+        for (Map.Entry<String, List<String>> entry1 : treeMap.entrySet()) {
+            for (Map.Entry<String, List<String>> entry2 : treeMap.entrySet()) {
+                if (entry1.getKey().equals(entry2.getKey()))
+                    break;
+                List<RespDto> respDtos = getResult(entry1.getValue(), entry1.getValue());
+                String s = respDtos.stream().map(RespDto::getCount).collect(Collectors.toList()).get(0);
+                treeSet.add(s);
+            }
+        }
 
+
+        //List<RespDto> respDtos = getResult(ranksA, ranksB);
+        System.out.println(treeSet);
+    }
+
+    private static List<RespDto> getResult(List<String> ranksA, List<String> ranksB) throws InterruptedException {
         List<String> list = new ArrayList<>();
         for (String ra : ranksA) {
             for (String rb : ranksB) {
                 list.add(set(ra, rb));
             }
         }
-
-        list.remove(0);
-        list.remove(1);
-
         int[] multiple = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
         boolean ary = true;
+        String count = "0";
+        //int n = 0;
         while (ary) {
-            for (int i = 0; i < list.size(); i++) {
+            String countt = count;
+            for (int i = 1; i < list.size(); i++) {
                 String[] strings = get(list.get(i));
                 String money = getMoney(strings[0], strings[1], multiple[i]);
-                String count = getCount(multiple);
+                count = getCount(multiple);
                 if (new BigDecimal(money).compareTo(new BigDecimal(count)) == -1) {
                     multiple[i]++;
                     continue;
                 }
             }
-            System.out.println(getMultiple(multiple));
+            /*System.out.println(list);
+            System.out.println(getStr(getMultiple(multiple)));
+            System.out.println(getStr(getRanks(multiple, list)));
+            System.out.println(count);
+            Thread.sleep(200);*/
+            if (count.equals(countt) || Integer.valueOf(count) > 1000000)
+                break;
         }
-
-        System.out.println(treeMap);
+       /* System.out.println(list);
+        System.out.println(getStr(getMultiple(multiple)));
+        System.out.println(getStr(getRanks(multiple, list)));
+        System.out.println(count);*/
+        List<RespDto> respDtos = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            RespDto respDto = new RespDto();
+            respDto.setScores(list.get(i));
+            respDto.setMultiple(multiple[i] + "");
+            String[] strings = get(list.get(i));
+            String money = getMoney(strings[0], strings[1], multiple[i]);
+            respDto.setMoney(money);
+            respDto.setCount(count);
+            respDtos.add(respDto);
+        }
+        return respDtos;
     }
 
-    public static String getMultiple(int[] multiple) {
+    /**
+     * 获取每队金额
+     *
+     * @param multiple
+     * @param list
+     * @return
+     */
+    public static List<String> getRanks(int[] multiple, List<String> list) {
+        List<String> arrayList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            String[] strings = get(list.get(i));
+            arrayList.add(getMoney(strings[0], strings[1], multiple[i]));
+        }
+        return arrayList;
+    }
+
+    /**
+     * 字符串拼接
+     *
+     * @param strs
+     * @return
+     */
+    public static String getStr(List<String> strs) {
         StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < multiple.length; i++) {
+        for (int i = 0; i < strs.size(); i++) {
             if (i != 0)
                 buffer.append(":");
-            buffer.append(multiple[i]);
+            buffer.append(strs.get(i));
         }
         return buffer.toString();
     }
 
+    /**
+     * 获取结果倍数
+     *
+     * @param multiple
+     * @return
+     */
+    public static List<String> getMultiple(int[] multiple) {
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < multiple.length; i++) {
+            list.add(multiple[i] + "");
+        }
+        return list;
+    }
+
+    /**
+     * 取总金额
+     *
+     * @param multiple
+     * @return
+     */
     private static String getCount(int[] multiple) {
         BigDecimal bigDecimal = new BigDecimal("0");
         for (int i = 0; i < multiple.length; i++) {
@@ -556,12 +634,21 @@ public class ReptileTest extends BaseTest {
         return ranks.split("-");
     }
 
+    /**
+     * 计算两对金额
+     *
+     * @param ranksA
+     * @param ranksB
+     * @param multiple
+     * @return
+     */
     private static String getMoney(String ranksA, String ranksB, int multiple) {
         return new BigDecimal(ranksA)
                 .multiply(new BigDecimal(ranksB))
                 .multiply(new BigDecimal(multiple + ""))
                 .multiply(new BigDecimal("2"))
                 .multiply(new BigDecimal("1"))
+                .setScale(2, BigDecimal.ROUND_DOWN)
                 .toString();
     }
 
@@ -591,5 +678,17 @@ public class ReptileTest extends BaseTest {
         String respBody = buffer.toString();
         httpConn.disconnect();//主动断开httpConn连接
         return respBody;
+    }
+
+    @Data
+    public static class RespDto {
+        //比例
+        private String scores;
+        //倍数
+        private String multiple;
+        //金额
+        private String money;
+
+        private String count;
     }
 }
