@@ -18,7 +18,7 @@ spring:
     multipart:
   redis:
     database: 0
-    host: 127.0.0.1
+    host: taom.xyz
     port: 6379
     pool:
       max-active: 15

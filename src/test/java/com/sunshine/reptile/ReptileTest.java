@@ -477,7 +477,8 @@ public class ReptileTest extends BaseTest {
 
     public static void main(String[] args) throws Exception {
         String regex = "<p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p><p class=\"betbtn\" data-type=\"[a-z]*\" data-value=\"\\d\" data-sp=\"\\d*\\.\\d*\"><span>(\\d*\\.\\d*)</span></p>";
-        Matcher matcher = Pattern.compile(regex).matcher(doGet("https://trade.500.com/jczq/"));
+       // Matcher matcher = Pattern.compile(regex).matcher(doGet("https://trade.500.com/jczq/"));
+        Matcher matcher = Pattern.compile(regex).matcher(doGet("https://trade.500.com/jczq/index.php?playid=312&g=2"));
         Map<String, List<String>> treeMap = new TreeMap<>();
         while (matcher.find()) {
             List<String> arrayList = new ArrayList<>();
@@ -495,21 +496,35 @@ public class ReptileTest extends BaseTest {
         String s1 = toArray[toArray.length - 1];
         String s2 = toArray[toArray.length - 2];
         List<String> ranksA = treeMap.get(s1);
+        ranksA=new ArrayList<>();
+
+        ranksA.add("2.30");
+        ranksA.add("3.35");
+        ranksA.add("2.50");
         List<String> ranksB = treeMap.get(s2);
+        ranksB=new ArrayList<>();
+        ranksB.add("2.48");
+        ranksB.add("3.15");
+        ranksB.add("2.43");
+
         Set<String> treeSet = new TreeSet<>();
-        for (Map.Entry<String, List<String>> entry1 : treeMap.entrySet()) {
+        TreeMap<String, List<List<RespDto>>> map = new TreeMap<>();
+        /*for (Map.Entry<String, List<String>> entry1 : treeMap.entrySet()) {
             for (Map.Entry<String, List<String>> entry2 : treeMap.entrySet()) {
                 if (entry1.getKey().equals(entry2.getKey()))
                     break;
                 List<RespDto> respDtos = getResult(entry1.getValue(), entry1.getValue());
                 String s = respDtos.stream().map(RespDto::getCount).collect(Collectors.toList()).get(0);
+                if (map.get(s)==null)
+                    map.put(s,new ArrayList<>());
+                map.get(s).add(respDtos);
                 treeSet.add(s);
             }
-        }
+        }*/
 
 
-        //List<RespDto> respDtos = getResult(ranksA, ranksB);
-        System.out.println(treeSet);
+        List<RespDto> respDtos = getResult(ranksA, ranksB);
+        System.out.println(map);
     }
 
     private static List<RespDto> getResult(List<String> ranksA, List<String> ranksB) throws InterruptedException {
@@ -525,7 +540,7 @@ public class ReptileTest extends BaseTest {
         //int n = 0;
         while (ary) {
             String countt = count;
-            for (int i = 1; i < list.size(); i++) {
+            for (int i = 2; i < list.size(); i++) {
                 String[] strings = get(list.get(i));
                 String money = getMoney(strings[0], strings[1], multiple[i]);
                 count = getCount(multiple);
